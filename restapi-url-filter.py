@@ -27,6 +27,9 @@ for line in io.open(input_file, 'r'):
     if (line.find('format=json') == -1): # check json format
         continue
 
+    if (line.find('language=ja') != -1 or line.find('region=jp') != -1):
+        continue
+
     videoId = getVideoId(line)  # check video id out of limit
     if (videoId < 0 or videoId > 879699):
         continue
