@@ -6,10 +6,11 @@ require "threadlimiter"
 
 Thread.abort_on_exception = true
 
-GALLARDO_HOST = http://restapitest1.server.hulu.com:8080
-RESTAPI_HOST = http://restapitest3.server.hulu.com:3000
+GALLARDO_HOST = 'http://restapitest1.server.hulu.com:8080'
+RESTAPI_HOST = 'http://restapitest3.server.hulu.com:3000'
 
-@url_file = 'final.txt'
+@url_file = $*[1]
+print 'use file', @url_file, "\n"
 
 def log str
   puts "[#{Time.now.strftime('%y%m%d_%H%M%S')}] #{str}"; STDOUT.flush
@@ -52,17 +53,23 @@ def get_url(url)
   }
 end
 
-thread_limiter = ThreadLimiter.new(30)
+thread_limiter = ThreadLimiter.new(1)
 total_videos_url = 0
-File.open(url_file, 'r').each { |line|
+file = File.open "out", "r"
+ll = 1
+file.each { |line|
   total_videos_url = total_videos_url + 1
+  if total_videos_url == ll then
+    puts ll
+    ll *= 2
+  end
   thread_limiter.fork(tmp_url = line) do
     get_url(tmp_url)
   end
 }
-
+puts "out of each"
 thread_limiter.wait
-
+puts "end wait"
 log "total_videos_url = #{total_videos_url}"
 if @response_time.size > 0 then
   log "result numbert = #{@response_time.size}"
