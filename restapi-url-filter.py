@@ -1,7 +1,16 @@
 import io
 import sys
 
+usage = '''
+Usage:
+cmd option input_file output_file
+option:
+--max-video-id id : set max video id
+--to-json : change format=xml to format=json
+'''
 
+def printUsage():
+    print 
 if (len(sys.argv) < 3):
     print 'Usage:\n' \
           'cmd input_file output_file'
@@ -22,6 +31,7 @@ def getVideoId(url):
         return int(id)
     except ValueError:
         return -1
+    except 
 
 for line in io.open(input_file, 'r'):
     if (line.find('format=json') == -1): # check json format
