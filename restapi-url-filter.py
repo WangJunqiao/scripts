@@ -1,26 +1,33 @@
 import io
 import sys
+# sed "s/format=xml/format=json/g" no-jp.log > no-jp-json.log
 
 usage = '''
 Usage:
 cmd option input_file output_file
 option:
---max-video-id id : set max video id
 --to-json : change format=xml to format=json
+--min-id : minimal id, default 0, set to -1 to allow no id situation
 '''
 
-def printUsage():
-    print 
-if (len(sys.argv) < 3):
-    print 'Usage:\n' \
-          'cmd input_file output_file'
-    exit()
 
-print "Parse file ", sys.argv[1]
-input_file = sys.argv[1]
-output_file = sys.argv[2]
-fw = io.open(output_file, 'w')
-
+def parse_args():
+    cnt = len(sys.argv)
+    if (cnt < 3):
+        print usage
+        exit()
+    args = {}
+    args['input_file'] = sys.argv[cnt - 2]
+    args['output_file'] = sys.argv[cnt - 1]
+    i = 1
+    while i < cnt - 2:
+        if sys.argv[i] == '--to-json':
+            args['--to-json'] = 1
+        if sys.argv[i] == '--min-id':
+            args['--min-id'] = int(sys.argv[i + 1])
+            i += 1
+        i += 1
+    return args
 
 def getVideoId(url):
     try:
@@ -31,20 +38,33 @@ def getVideoId(url):
         return int(id)
     except ValueError:
         return -1
-    except 
+    except IndexError:
+        return -1
 
-for line in io.open(input_file, 'r'):
-    if (line.find('format=json') == -1): # check json format
-        continue
-
-    if (line.find('language=ja') != -1 or line.find('region=jp') != -1):
-        continue
-
-    videoId = getVideoId(line)  # check video id out of limit
-    if (videoId < 0 or videoId > 879699):
-        continue
-
-    fw.write(line)
-
-fw.close()
+if __name__ == '__main__':
+    args = parse_args()
+    fw = io.open(args['output_file'], 'w')
+    for line in io.open(args['input_file'], 'r'):
+        if '--to-json' in args:
+            line = line.replace('format=xml', 'format=json')
+            if line.find('format=json') == -1:
+                line = line.strip('\n') + "&format=json\n"
+        
+        if (line.find('format=json') == -1): # default only json format
+            continue
+    
+        if (line.find('language=ja') != -1 or line.find('region=jp') != -1): # default no jp reqs
+            continue
+    
+        videoId = getVideoId(line)  # check video id out of limit
+        if '--min-id' in args:
+            min_id = args['--min-id']
+        else:
+            min_id = 0
+        if (videoId < min_id or videoId > 879699):
+            continue
+    
+        fw.write(line)
+    
+    fw.close()
 
