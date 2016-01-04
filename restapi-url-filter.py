@@ -9,6 +9,7 @@ option:
 --to-json : change format=xml to format=json
 --min-id : minimal id, default 0, set to -1 to allow no id situation
 --max-id : maximal id
+--contain : must contain some str.
 '''
 
 
@@ -18,6 +19,7 @@ def parse_args():
         print usage
         exit()
     args = {}
+    args['contain'] = []
     args['input_file'] = sys.argv[cnt - 2]
     args['output_file'] = sys.argv[cnt - 1]
     i = 1
@@ -26,6 +28,9 @@ def parse_args():
             args['--to-json'] = 1
         if sys.argv[i] == '--min-id':
             args['--min-id'] = int(sys.argv[i + 1])
+            i += 1
+        if sys.argv[i] == '--contain':
+            args['contain'].append(sys.argv[i + 1])
             i += 1
         i += 1
     return args
@@ -53,10 +58,20 @@ if __name__ == '__main__':
         
         if (line.find('format=json') == -1): # default only json format
             continue
-    
+
+	    if (line.find('sort=release_with_popularity') != -1):
+	        continue
+     
         if (line.find('language=ja') != -1 or line.find('region=jp') != -1): # default no jp reqs
             continue
-    
+        
+        cont = False
+        for s in args['contain']:
+            if (line.find(s) == -1):
+                cont = true
+        if cont:
+            continue
+
         videoId = getVideoId(line)  # check video id out of limit
         if '--min-id' in args:
             min_id = args['--min-id']
