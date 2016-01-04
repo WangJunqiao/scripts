@@ -8,6 +8,7 @@ cmd option input_file output_file
 option:
 --to-json : change format=xml to format=json
 --min-id : minimal id, default 0, set to -1 to allow no id situation
+--max-id : maximal id
 '''
 
 
@@ -61,7 +62,11 @@ if __name__ == '__main__':
             min_id = args['--min-id']
         else:
             min_id = 0
-        if (videoId < min_id or videoId > 879699):
+        if '--max-id' in args:
+            max_id = args['--max-id']
+        else:
+            max_id = 879699
+        if (videoId < min_id or videoId > max_id):
             continue
     
         fw.write(line)

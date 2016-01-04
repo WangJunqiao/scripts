@@ -53,6 +53,7 @@ def get_url(url)
   }
 end
 
+# set multi threading
 thread_limiter = ThreadLimiter.new(1)
 total_videos_url = 0
 file = File.open "out", "r"
