@@ -1,21 +1,44 @@
-#ruby restapi-log-getter.rb
+#!/bin/bash
 
-python restapi-url-filter.py --to-json video-id.log video-id.log.filtered
-ruby to-siege-urls.rb video-id.log.filtered video-id.log.filtered.siege1 http://restapitest1.server.hulu.com:8080
-ruby to-siege-urls.rb video-id.log.filtered video-id.log.filtered.siege3 http://restapitest3.server.hulu.com:3000
+function exec_with_print() {
+    echo $1
+    `$1`
+}
 
-python restapi-url-filter.py --to-json --min-id -1 --contain only=id video-index.log video-index.log.filtered
-ruby to-siege-urls.rb video-index.log.filtered video-index.log.filtered.siege1 http://restapitest1.server.hulu.com:8080
-ruby to-siege-urls.rb video-index.log.filtered video-index.log.filtered.siege3 http://restapitest3.server.hulu.com:3000
+function exec_with_13() {
+    # $1 video-id.log.filtered
+    sed 's/^/http:\/\/restapitest1.server.hulu.com:8080/g' $1  > $1.siege1
+    exec_with_print "siege -c8 -t1M -b -i -q -f $1.siege1"
+    sed 's/^/http:\/\/restapitest3.server.hulu.com:3000/g' $1  > $1.siege3
+    exec_with_print "siege -c8 -t1M -b -i -q -f $1.siege3"
+}
 
-cat video-index.log.filtered.siege1 | grep -v "show_id" | grep -v "company_id=" > video-index.log.filtered.siege1.fullscan
+log="video-id.log"
+exec_with_print "python restapi-url-filter.py --to-json $log $log.filtered"
+exec_with_13 $log.filtered
 
-python restapi-url-filter.py --to-json show-id.log show-id.log.filtered
-ruby to-siege-urls.rb show-id.log.filtered show-id.log.filtered.siege1 http://restapitest1.server.hulu.com:8080
-ruby to-siege-urls.rb show-id.log.filtered show-id.log.filtered.siege3 http://restapitest3.server.hulu.com:3000
+log="show-id.log"
+exec_with_print "python restapi-url-filter.py --to-json $log $log.filtered"
+exec_with_13 $log.filtered
 
-python restapi-url-filter.py --to-json --min-id -1 --contain only=id show-index.log show-index.log.filtered
-ruby to-siege-urls.rb show-index.log.filtered show-index.log.filtered.siege1 http://restapitest1.server.hulu.com:8080
-ruby to-siege-urls.rb show-index.log.filtered show-index.log.filtered.siege3 http://restapitest3.server.hulu.com:3000
+log="video-index.log"
+exec_with_print "python restapi-url-filter.py --to-json --min-id -1 --contain only=id $log $log.filtered"
+cat $log.filtered | grep -v show_id | grep -v company_id= > $log.filtered.noindex
+cat $log.filtered | grep show_id > $log.filtered.index
+cat $log.filtered | grep -v show_id | grep company_id= >> $log.filtered.index
+exec_with_13 $log.filtered
+exec_with_13 $log.filtered.noindex
+exec_with_13 $log.filtered.index
+
+log="show-index.log"
+exec_with_print "python restapi-url-filter.py --to-json --min-id -1 --contain only=id $log $log.filtered"
+cat $log.filtered | grep -v show_id | grep -v company_id= > $log.filtered.noindex
+cat $log.filtered | grep show_id > $log.filtered.index
+cat $log.filtered | grep -v show_id | grep company_id= >> $log.filtered.index
+exec_with_13 $log.filtered
+exec_with_13 $log.filtered.noindex
+exec_with_13 $log.filtered.index
+
+
 
 
