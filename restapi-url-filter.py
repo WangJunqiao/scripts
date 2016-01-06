@@ -55,16 +55,19 @@ if __name__ == '__main__':
             line = line.replace('format=xml', 'format=json')
             if line.find('format=json') == -1:
                 line = line.strip('\n') + "&format=json\n"
-        
+
         if (line.find('format=json') == -1): # default only json format
             continue
 
-	    if (line.find('sort=release_with_popularity') != -1):
-	        continue
-     
+        if (line.find('sort=release_with_popularity') != -1):
+            continue
+
+        if (line.find('device_id=4') != -1):
+            continue
+
         if (line.find('language=ja') != -1 or line.find('region=jp') != -1): # default no jp reqs
             continue
-        
+
         cont = False
         for s in args['contain']:
             if (line.find(s) == -1):
@@ -83,8 +86,8 @@ if __name__ == '__main__':
             max_id = 879699
         if (videoId < min_id or videoId > max_id):
             continue
-    
+
         fw.write(line)
-    
+
     fw.close()
 
