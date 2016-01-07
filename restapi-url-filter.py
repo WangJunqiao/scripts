@@ -54,7 +54,7 @@ if __name__ == '__main__':
         if '--to-json' in args:
             line = line.replace('format=xml', 'format=json')
             if line.find('format=json') == -1:
-                line = line.strip('\n') + "&format=json\n"
+                line = line.strip('\n').strip('\t') + "&format=json\n"
 
         if (line.find('format=json') == -1): # default only json format
             continue
@@ -63,9 +63,6 @@ if __name__ == '__main__':
             continue
 
         if (line.find('device_id=4') != -1):
-            continue
-
-        if (line.find('language=ja') != -1 or line.find('region=jp') != -1): # default no jp reqs
             continue
 
         cont = False

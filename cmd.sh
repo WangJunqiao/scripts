@@ -8,9 +8,9 @@ function exec_with_print() {
 function exec_with_13() {
     # $1 video-id.log.filtered
     sed 's/^/http:\/\/restapitest1.server.hulu.com:8080/g' $1  > $1.siege1
-    exec_with_print "siege -c8 -t3M -b -i -q -f $1.siege1"
+    exec_with_print "siege -c8 -t5S -b -i -q -f $1.siege1"
     sed 's/^/http:\/\/restapitest3.server.hulu.com:3000/g' $1  > $1.siege3
-    exec_with_print "siege -c8 -t3M -b -i -q -f $1.siege3"
+    exec_with_print "siege -c8 -t5S -b -i -q -f $1.siege3"
 }
 
 log="video-id.log"
